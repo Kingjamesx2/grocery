@@ -16,7 +16,14 @@ type Grocery struct {
 	ID        int64     `json:"id"`
 	CreatedAt time.Time `json:"-"`
 	Name      string    `json:"name"`
-	Task      string    `json:"task"`
+	Item      string    `json:"item"`
+	Location  string    `json:"location"`
+	Price     string    `json:"price"`
+	Address   string    `json:"address"`
+	Phone     string    `json:"phone"`
+	Contact   string    `json:"contact"`
+	Email     string    `json:"email"`
+	Website   string    `json:"website"`
 	Version   int32     `json:"version"`
 }
 
@@ -25,8 +32,29 @@ func ValidateGrocery(v *validator.Validator, grocery *Grocery) {
 	v.Check(grocery.Name != "", "name", "must be provided")
 	v.Check(len(grocery.Name) <= 200, "name", "must not be more than 200 bytes long")
 
-	v.Check(grocery.Task != "", "task", "must be provided")
-	v.Check(len(grocery.Task) <= 200, "task", "must not be more than 200 bytes long")
+	v.Check(grocery.Item != "", "item", "must be provided")
+	v.Check(len(grocery.Item) <= 200, "item", "must not be more than 200 bytes long")
+
+	v.Check(grocery.Location != "", "location", "must be provided")
+	v.Check(len(grocery.Location) <= 200, "location", "must not be more than 200 bytes long")
+
+	v.Check(grocery.Price != "", "price", "must be provided")
+	v.Check(len(grocery.Price) <= 200, "price", "must not be more than 200 bytes long")
+
+	v.Check(grocery.Address != "", "address", "must be provided")
+	v.Check(len(grocery.Address) <= 200, "address", "must not be more than 200 bytes long")
+
+	v.Check(grocery.Phone != "", "phone", "must be provided")
+	v.Check(len(grocery.Phone) <= 200, "phone", "must not be more than 200 bytes long")
+
+	v.Check(grocery.Contact != "", "contact", "must be provided")
+	v.Check(len(grocery.Contact) <= 200, "contact", "must not be more than 200 bytes long")
+
+	v.Check(grocery.Email != "", "email", "must be provided")
+	v.Check(len(grocery.Email) <= 200, "email", "must not be more than 200 bytes long")
+
+	v.Check(grocery.Website != "", "task", "must be provided")
+	v.Check(len(grocery.Website) <= 200, "task", "must not be more than 200 bytes long")
 }
 
 // Define a grocery list model which wraps a sql.DB connection pool
@@ -37,8 +65,8 @@ type GroceryModel struct {
 // Insert() allows us to create a new grocery task
 func (m GroceryModel) Insert(grocery *Grocery) error {
 	query := `
-	INSERT INTO grocery (name, task)
-	VALUES ($1, $2)
+	INSERT INTO grocery (name, item, location, price, address, phone, contact, email, website )
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 	RETURNING id, created_at, version
 	`
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -46,7 +74,7 @@ func (m GroceryModel) Insert(grocery *Grocery) error {
 	defer cancel()
 
 	// Collect the data fields into a slice
-	args := []interface{}{grocery.Name, grocery.Task}
+	args := []interface{}{grocery.Name, grocery.Item, grocery.Location, grocery.Price, grocery.Address, grocery.Phone, grocery.Contact, grocery.Email, grocery.Website}
 	return m.DB.QueryRowContext(ctx, query, args...).Scan(&grocery.ID, &grocery.CreatedAt, &grocery.Version)
 }
 
@@ -57,7 +85,7 @@ func (m GroceryModel) Get(id int64) (*Grocery, error) {
 	}
 	// Create query
 	query := `
-		SELECT id, created_at, name, task, version
+		SELECT id, created_at, name, item, location, price, address, phone, contact, email, website, version
 		FROM grocery
 		WHERE id = $1
 	`
@@ -71,7 +99,14 @@ func (m GroceryModel) Get(id int64) (*Grocery, error) {
 		&grocery.ID,
 		&grocery.CreatedAt,
 		&grocery.Name,
-		&grocery.Task,
+		&grocery.Item,
+		&grocery.Location,
+		&grocery.Price,
+		&grocery.Address,
+		&grocery.Phone,
+		&grocery.Contact,
+		&grocery.Email,
+		&grocery.Website,
 		&grocery.Version,
 	)
 	// Handle any errors
@@ -89,13 +124,13 @@ func (m GroceryModel) Get(id int64) (*Grocery, error) {
 }
 
 // Update() allows us to edit/alter a grocery item in the list
-func (m groceryModel) Update(grocery *Grocery) error {
+func (m GroceryModel) Update(grocery *Grocery) error {
 	query := `
 		UPDATE grocery 
-		set name = $1, task = $2,  
+		set name = $1, item = $2, location = $3, price = $4, address = $5, phone = $6, contact = $7, email = $8, website = $9
 		version = version + 1
-		WHERE id = $3
-		AND version = $4
+		WHERE id = $10
+		AND version = $11
 		RETURNING version
 	`
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -104,7 +139,14 @@ func (m groceryModel) Update(grocery *Grocery) error {
 
 	args := []interface{}{
 		grocery.Name,
-		grocery.Task,
+		&grocery.Item,
+		&grocery.Location,
+		&grocery.Price,
+		&grocery.Address,
+		&grocery.Phone,
+		&grocery.Contact,
+		&grocery.Email,
+		&grocery.Website,
 		grocery.ID,
 		grocery.Version,
 	}

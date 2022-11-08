@@ -121,7 +121,6 @@ func (app *application) updateGroceryInfoHandler(w http.ResponseWriter, r *http.
 	// if a field remains nil then we know that the client did not update it
 	var input struct {
 		Name     *string `json:"name"`
-		Name     string  `json:"name"`
 		Item     *string `json:"item"`
 		Location *string `json:"location"`
 		Price    *string `json:"price"`
@@ -142,8 +141,29 @@ func (app *application) updateGroceryInfoHandler(w http.ResponseWriter, r *http.
 	if input.Name != nil {
 		grocery.Name = *input.Name
 	}
-	if input.Task != nil {
-		grocery.Task = *input.Task
+	if input.Item != nil {
+		grocery.Item = *input.Item
+	}
+	if input.Location != nil {
+		grocery.Locaation = *input.Location
+	}
+	if input.Price != nil {
+		grocery.Price = *input.Price
+	}
+	if input.Address != nil {
+		grocery.Address = *input.Address
+	}
+	if input.Phone != nil {
+		grocery.Phone = *input.Phone
+	}
+	if input.Contact != nil {
+		grocery.Contact = *input.Contact
+	}
+	if input.Email != nil {
+		grocery.Email = *input.Email
+	}
+	if input.Website != nil {
+		grocery.Website = *input.Website
 	}
 
 	// Perform Validation on the updated grocery task. If validation fails then
