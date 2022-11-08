@@ -21,5 +21,5 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPatch, "/v1/groceryInfo/:id", app.updateGroceryInfoHandler)
 	router.HandlerFunc(http.MethodDelete, "/v1/groceryInfo/:id", app.deleteGroceryInfoHandler)
 
-	return app.recoverPanic(router)
+	return app.recoverPanic(app.rateLimit(router))
 }
