@@ -145,7 +145,7 @@ func (app *application) updateGroceryInfoHandler(w http.ResponseWriter, r *http.
 		grocery.Item = *input.Item
 	}
 	if input.Location != nil {
-		grocery.Locaation = *input.Location
+		grocery.Location = *input.Location
 	}
 	if input.Price != nil {
 		grocery.Price = *input.Price
