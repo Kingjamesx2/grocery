@@ -53,8 +53,8 @@ func ValidateGrocery(v *validator.Validator, grocery *Grocery) {
 	v.Check(grocery.Email != "", "email", "must be provided")
 	v.Check(len(grocery.Email) <= 200, "email", "must not be more than 200 bytes long")
 
-	v.Check(grocery.Website != "", "task", "must be provided")
-	v.Check(len(grocery.Website) <= 200, "task", "must not be more than 200 bytes long")
+	v.Check(grocery.Website != "", "website", "must be provided")
+	v.Check(len(grocery.Website) <= 200, "website", "must not be more than 200 bytes long")
 }
 
 // Define a grocery list model which wraps a sql.DB connection pool
@@ -62,7 +62,7 @@ type GroceryModel struct {
 	DB *sql.DB
 }
 
-// Insert() allows us to create a new grocery task
+// Insert() allows us to create a new grocery item
 func (m GroceryModel) Insert(grocery *Grocery) error {
 	query := `
 	INSERT INTO grocery (name, item, location, price, address, phone, contact, email, website )
@@ -139,14 +139,14 @@ func (m GroceryModel) Update(grocery *Grocery) error {
 
 	args := []interface{}{
 		grocery.Name,
-		&grocery.Item,
-		&grocery.Location,
-		&grocery.Price,
-		&grocery.Address,
-		&grocery.Phone,
-		&grocery.Contact,
-		&grocery.Email,
-		&grocery.Website,
+		grocery.Item,
+		grocery.Location,
+		grocery.Price,
+		grocery.Address,
+		grocery.Phone,
+		grocery.Contact,
+		grocery.Email,
+		grocery.Website,
 		grocery.ID,
 		grocery.Version,
 	}
@@ -163,7 +163,7 @@ func (m GroceryModel) Update(grocery *Grocery) error {
 	return nil
 }
 
-// Delete() removes a specific Task
+// Delete() removes a specific item
 func (m GroceryModel) Delete(id int64) error {
 	// Ensure that there is a valid id
 	if id < 1 {
@@ -198,14 +198,15 @@ func (m GroceryModel) Delete(id int64) error {
 }
 
 // the GetAll() method returns a list of all the Grocery sorted by id
-func (m GroceryModel) GetAll(name string, task string, filters Filters) ([]*Grocery, Metadata, error) {
+func (m GroceryModel) GetAll(name string, item string, filters Filters) ([]*Grocery, Metadata, error) {
 	//construct the query to return all grocery
 	//make query into formated string to be able to sort by field and asc or dec dynaimicaly
 	query := fmt.Sprintf(`
-		SELECT COUNT(*) OVER(),id, created_at, name, task, version
+		SELECT COUNT(*) OVER(),id, created_at, name, item, 
+		location, price, address, phone, contact, email, website, version
 		FROM grocery
 		WHERE (to_tsvector('simple',name) @@ plainto_tsquery('simple', $1) OR $1 = '')
-		AND (to_tsvector('simple',task) @@ plainto_tsquery('simple', $2) OR $2 = '')
+		AND (to_tsvector('simple',item) @@ plainto_tsquery('simple', $2) OR $2 = '')
 		ORDER BY %s %s, id ASC
 		LIMIT $3 OFFSET $4`, filters.sortColumn(), filters.sortOrder())
 
@@ -213,7 +214,7 @@ func (m GroceryModel) GetAll(name string, task string, filters Filters) ([]*Groc
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	//execute the query
-	args := []interface{}{name, task, filters.limit(), filters.offset()}
+	args := []interface{}{name, item, filters.limit(), filters.offset()}
 	rows, err := m.DB.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, Metadata{}, err
@@ -233,7 +234,14 @@ func (m GroceryModel) GetAll(name string, task string, filters Filters) ([]*Groc
 			&grocery.ID,
 			&grocery.CreatedAt,
 			&grocery.Name,
-			&grocery.Task,
+			&grocery.Item,
+			&grocery.Location,
+			&grocery.Price,
+			&grocery.Address,
+			&grocery.Phone,
+			&grocery.Contact,
+			&grocery.Email,
+			&grocery.Website,
 			&grocery.Version,
 		)
 		if err != nil {
