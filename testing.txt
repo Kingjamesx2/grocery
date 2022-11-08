@@ -2,7 +2,7 @@
 curl -i http://localhost:4000/v1/healthcheck
 
 to check insert
-BODY='{"name":"Advance Web James ", "task":"Get it to work"}'
+BODY='{"name":"James ", "item":"peanuts", "location": "banak street", "price": "$2.12", "address": "23 antelope street", "phone": "6234563","contact":"6049299", "email": "jaafaber@gmail.com", "website": "www.jamsfaber.com"}'
 curl -i -d "$BODY" localhost:4000/v1/todoInfo
 
 to check Get

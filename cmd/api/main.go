@@ -14,6 +14,7 @@ import (
 
 	_ "github.com/lib/pq"
 	"grocery.jamesfaber.net/internal/data"
+	"grocery.jamesfaber.net/internal/jsonlog"
 )
 
 // The application version nimber
@@ -35,7 +36,7 @@ type config struct {
 // Dependency injection - the process of supplying a resource that a given piece of code requires.
 type application struct {
 	config config
-	logger *log.Logger
+	logger *jsonlog.Logger
 	models data.Models
 }
 
@@ -53,16 +54,16 @@ func main() {
 	flag.Parse()
 
 	//Create a logger - Logging is a means of tracking events that happen when some software runs.
-	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
+	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
 	// Create the connection pool
 	db, err := openDB(cfg)
 	if err != nil {
-		logger.Fatal(err, nil)
+		logger.PrintFatal(err, nil)
 	}
 
 	defer db.Close()
 	// Log the successful connection pool
-	logger.Println("database connection pool established", nil)
+	logger.PrintInfo("database connection pool established", nil)
 
 	//Create an instance of our applications struct
 	app := &application{
@@ -79,15 +80,19 @@ func main() {
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.port),
 		Handler:      app.routes(),
+		ErrorLog:     log.New(logger, "", 0),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,
 	}
 
 	// Start our server
-	logger.Printf("starting %s server on %s", cfg.env, srv.Addr)
+	logger.PrintInfo("starting server", map[string]string{
+		"addr": srv.Addr,
+		"env":  cfg.env,
+	})
 	err = srv.ListenAndServe()
-	logger.Fatal(err)
+	logger.PrintFatal(err, nil)
 }
 
 // The openDB() function returns a *sql.DB connection pool
