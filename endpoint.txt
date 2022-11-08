@@ -1,0 +1,7 @@
+Method	URL Pattern	   Handler		    Action
+GET	/v1/healthcheck    healthcheckHandler	    Show application information
+GET  	/v1/groceryInfo	   listGroceryInfoHandler       Show the details of all grocery task
+POST 	/v1/groceryInfo	   createGroceryInfoHandler	    Create a new grocery
+GET 	/v1/groceryInfo/:id    showGroceryInfoHandler	    Show details of a specific grocery task
+PUT 	/v1/groceryInfo/:id    updateGroceryInfoHandler	    Update details of a specific grocery list
+DELETE  /v1/groceryInfo/:id    deleteGroceryInfoHandler	    Delete a specific grocery task

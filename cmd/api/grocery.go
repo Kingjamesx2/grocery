@@ -266,7 +266,7 @@ func (app *application) listGroceryInfoHandler(w http.ResponseWriter, r *http.Re
 		return
 	}
 	// Get a listing of all grocery tasks
-	groceries, metadata, err := app.models.Groceries.GetAll(input.Name, input.Item, input.Price, input.Filters)
+	groceries, metadata, err := app.models.Groceries.GetAll(input.Name, input.Item, input.Filters)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return

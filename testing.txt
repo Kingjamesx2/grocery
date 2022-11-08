@@ -1,0 +1,23 @@
+--To check json responses---
+curl -i http://localhost:4000/v1/healthcheck
+
+to check insert
+BODY='{"name":"Advance Web James ", "task":"Get it to work"}'
+curl -i -d "$BODY" localhost:4000/v1/todoInfo
+
+to check Get
+curl -i localhost:4000/v1/todoInfo/3
+
+to Update
+curl -X PATCH -d '{"name": "Adele hello"}' localhost:4000/v1/todoInfo/3
+
+to delete
+curl -X DELETE localhost:4000/v1/todoInfo/3
+
+curl "localhost:4000/v1/todoInfo?name=Advance+Web+James+&page=1&page_size=7&sort=-id"
+
+to check validation for filtering 
+curl "localhost:4000/v1/todoInfo?page=0&page_size=-1&sort=-bar"
+
+to check Get all
+curl localhost:4000/v1/todoInfo
