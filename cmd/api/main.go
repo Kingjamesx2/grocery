@@ -70,7 +70,7 @@ func main() {
 	flag.IntVar(&cfg.smtp.port, "smtp-port", 25, "SMTP port")
 	flag.StringVar(&cfg.smtp.username, "smtp-username", "b44806e6f8bd4f", "SMTP username")
 	flag.StringVar(&cfg.smtp.password, "smtp-password", "202224c9eb599e", "SMTP password")
-	flag.StringVar(&cfg.smtp.sender, "smtp-sender", "Grocery <no-reply@grocery.jamesfaber.net>", "SMTP sender")
+	flag.StringVar(&cfg.smtp.sender, "smtp-sender", "Grocery <no-reply@Grocery.jamesfaber.net>", "SMTP sender")
 
 	flag.Parse()
 
