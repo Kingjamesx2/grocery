@@ -21,7 +21,7 @@ type User struct {
 	CreatedAt time.Time `json:"created_at"`
 	Name      string    `json:"name"`
 	Email     string    `json:"email"`
-	Password  password  `json: "-"`
+	Password  password  `json:"-"`
 	Activated bool      `json:"activated"`
 	Version   int       `json:"-"`
 }
@@ -94,7 +94,7 @@ type UserModel struct {
 func (m UserModel) Insert(user *User) error {
 	//create our query
 	query := `
-		INSERT INTO user (name, email, password_hash, activated)
+		INSERT INTO users (name, email, password_hash, activated)
 		Values($1, $2, $3, $4)
 		RETURNING id, created_at, version
 		`

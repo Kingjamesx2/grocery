@@ -15,7 +15,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 	var input struct {
 		Name     string `json:"name"`
 		Email    string `json:"email"`
-		Password string `json: "password"`
+		Password string `json:"password"`
 	}
 
 	//Parese the request body into the anonymous struct
@@ -46,21 +46,28 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	//INsert the datain the database
+	//Insert the datain the database
 	err = app.models.Users.Insert(user)
 	if err != nil {
 		switch {
 		case errors.Is(err, data.ErrDuplicateEmail):
-			v.AddError("email", "a user with this email address a;ready exist")
+			v.AddError("email", "a user with this email address already exist")
 			app.failedValidationResponse(w, r, v.Errors)
 		default:
 			app.serverErrorResponse(w, r, err)
 		}
 		return
 	}
-	//write a 201 created status
-	err = app.writeJSON(w, http.StatusCreated, envelope{"user": user}, nil)
-	if err != nil {
-		app.serverErrorResponse(w, r, err)
-	}
+	// // Send the email to the new user
+	// err = app. mailer.Send(user.Email, "user_welcome.tmpl", user)
+	// if err != nil {
+	// 	app.serverErrorResponse(w, r, err)
+	// 	return
 }
+
+// 	// //write a 201 created status
+// 	// err = app.writeJSON(w, http.StatusCreated, envelope{"user": user}, nil)
+// 	// if err != nil {
+// 	// 	app.serverErrorResponse(w, r, err)
+// 	// }
+// }
