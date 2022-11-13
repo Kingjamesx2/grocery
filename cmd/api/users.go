@@ -58,12 +58,15 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		}
 		return
 	}
-	// Send the email to the new user
-	err = app.mailer.Send(user.Email, "user_welcome.tmpl", user)
-	if err != nil {
-		app.serverErrorResponse(w, r, err)
-		return
-	}
+
+	app.background(func() {
+		// Send the email to the new user
+		err = app.mailer.Send(user.Email, "user_welcome.tmpl", user)
+		if err != nil {
+			app.logger.PrintError(err, nil)
+			return
+		}
+	})
 
 	//write a 201 created status
 	err = app.writeJSON(w, http.StatusCreated, envelope{"user": user}, nil)
@@ -71,3 +74,19 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		app.serverErrorResponse(w, r, err)
 	}
 }
+
+// // background accepts a function as its parameter
+// func (app *application) background(fn func()) {
+// 	//launch/create a goroutine which runs an anonymous function that sends the welcome message
+// 	go func() {
+// 		//recover from panics
+// 		defer func() {
+// 			if err := recover(); err != nil {
+// 				app.logger.PrintError(fmt.Errorf("%s", err), nil)
+// 			}
+// 		}()
+// 		// execute fn which is code to send an email
+// 		fn()
+// 	}()
+
+// }
