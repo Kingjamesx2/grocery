@@ -1,0 +1,39 @@
+{{/* Filename: internal/mailer/templates/user_welcome.tmpl */}}
+
+{{ define "subject" }}Welcome to appletree!{{ end }}
+{{ define "plainBody" }}
+Hi, 
+
+Thank you for signing up for an appletree account! 
+We are excited to have you on board! 
+For future reference, please note that your identification number 
+is {{ .ID }}.
+
+Thanks, 
+
+The Appletree Team 
+{{ end }}
+
+{{ define "htmlBody" }}
+<!doctype html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width"/>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+</head>
+
+<body>
+    <p>Hi,</p> 
+
+    <p>Thank you for signing up for an appletree account!</p>
+    <p>We are excited to have you on board! </p>
+    <p>For future reference, please note that your identification number 
+    is {{ .ID }}. </p>
+
+    <p>Thanks,</p> 
+
+    <p>The Appletree Team </p>
+</body>
+</html>
+{{ end }}
