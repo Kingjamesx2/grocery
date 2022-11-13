@@ -5,6 +5,7 @@ package main
 import (
 	"errors"
 	"net/http"
+	"time"
 
 	"grocery.jamesfaber.net/internal/data"
 	"grocery.jamesfaber.net/internal/validator"
@@ -59,25 +60,25 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	// // Generate a token for the newly created user
-	// token, err := app.models.Tokens.New(user.ID, 1*24*time.Hour, data.ScopeActivation)
-	// if err != nil {
-	// 	app.serverErrorResponse(w, r, err)
-	// 	return
-	// }
-	// app.background(func() {
-	// 	data := map[string]interface{} {
-	// 		"activationToken" : token.Plaintext,
-	// 		"userID" : user.ID,
-	// 	}
-	// 	// Send the email to the new user
-	// 	err = app.mailer.Send(user.Email, "user_welcome.tmpl", data)
-	// 	if err != nil {
-	// 		// log errors
-	// 		app.logger.PrintError(err, nil)
-	// 	}
+	// Generate a token for the newly created user
+	token, err := app.models.Tokens.New(user.ID, 1*24*time.Hour, data.ScopeActivation)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+	app.background(func() {
+		data := map[string]interface{}{
+			"activationToken": token.Plaintext,
+			"userID":          user.ID,
+		}
+		// Send the email to the new user
+		err = app.mailer.Send(user.Email, "user_welcome.tmpl", data)
+		if err != nil {
+			// log errors
+			app.logger.PrintError(err, nil)
+		}
 
-	// })
+	})
 
 	//write a 202 Accepted status
 	err = app.writeJSON(w, http.StatusAccepted, envelope{"user": user}, nil)

@@ -23,6 +23,6 @@ func NewModels(db *sql.DB) Models {
 	return Models{
 		Groceries: GroceryModel{DB: db},
 		Users:     UserModel{DB: db},
-		Tokens:    TokenModel{},
+		Tokens:    TokenModel{DB: db},
 	}
 }
