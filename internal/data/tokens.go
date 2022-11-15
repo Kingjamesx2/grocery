@@ -13,13 +13,12 @@ import (
 	"grocery.jamesfaber.net/internal/validator"
 )
 
-// Token categories/scopes
-
+// / Token categories/scopes
 const (
 	ScopeActivation = "activation"
 )
 
-// Define the token type
+// Define the Token type
 type Token struct {
 	Plaintext string
 	Hash      []byte
@@ -28,21 +27,21 @@ type Token struct {
 	Scope     string
 }
 
-// The generate token function returns a token
+// The generateToken() function returns a Token
 func generateToken(userID int64, ttl time.Duration, scope string) (*Token, error) {
 	token := &Token{
 		UserID: userID,
 		Expiry: time.Now().Add(ttl),
 		Scope:  scope,
 	}
-	// Create a byte slice to hold random values and fill it with values
-	// from the CSPRNG
+	// Create a byte slice to hold random values and fill with values
+	// from CSPRNG
 	randomBytes := make([]byte, 16)
 	_, err := rand.Read(randomBytes)
 	if err != nil {
 		return nil, err
 	}
-	// Encode the byte slice to a base32 encoded string
+	// Encode the byte slice to a base-32 encoded string
 	token.Plaintext = base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString(randomBytes)
 	// Hash the string token
 	hash := sha256.Sum256([]byte(token.Plaintext))
@@ -51,13 +50,13 @@ func generateToken(userID int64, ttl time.Duration, scope string) (*Token, error
 	return token, nil
 }
 
-// Check that the plaintext token is 26 bytes long
-func ValidateTokenPlaintext(v *validator.Validator, tokenPlaintext string) {
+// Check that the plaintest token is  26 bytes long
+func ValidateTokenPlainText(v *validator.Validator, tokenPlaintext string) {
 	v.Check(tokenPlaintext != "", "token", "must be 26 bytes long")
 	v.Check(len(tokenPlaintext) == 26, "token", "must be 26 bytes long")
 }
 
-// Define the token model
+// Define the Token model
 type TokenModel struct {
 	DB *sql.DB
 }
@@ -78,7 +77,6 @@ func (m TokenModel) Insert(token *Token) error {
 		INSERT INTO tokens (hash, user_id, expiry, scope)
 		VALUES ($1, $2, $3, $4)
 	`
-
 	args := []interface{}{
 		token.Hash,
 		token.UserID,
@@ -91,15 +89,15 @@ func (m TokenModel) Insert(token *Token) error {
 	_, err := m.DB.ExecContext(ctx, query, args...)
 	return err
 }
+
 func (m TokenModel) DeleteAllForUsers(scope string, userID int64) error {
 	query := `
 		DELETE FROM tokens
-		WHERE scope = $1 and user_id = $2
+		WHERE scope = $1 AND user_id = $2
 	`
-
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-
 	_, err := m.DB.ExecContext(ctx, query, scope, userID)
+
 	return err
 }

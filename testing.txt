@@ -36,3 +36,14 @@ pkill -SIGKILL api
 pkill -SIGTERM api
 pkill -SIGQUIT api
 ctrl + \ (SIGQUIT)
+
+
+Rate limiting
+for i in {1..6}; do curl http://localhost:4000/v1/healthcheck; done
+
+Graceful shutdown
+curl localhost:4000/v1/healthcheck & pkill -SIGTERM api
+
+Create new User
+BODY='{"name":"elishaMartine", "email":"elishaMartine@gmail.com", "password":"appletree"}'
+url -w '\nTime: %{time_total}\n' -d "$BODY" localhost:4000/v1/users
