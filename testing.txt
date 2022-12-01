@@ -46,4 +46,14 @@ curl localhost:4000/v1/healthcheck & pkill -SIGTERM api
 
 Create new User
 BODY='{"name":"elishaMartine", "email":"elishaMartine@gmail.com", "password":"appletree"}'
-url -w '\nTime: %{time_total}\n' -d "$BODY" localhost:4000/v1/users
+curl -w '\nTime: %{time_total}\n' -d "$BODY" localhost:4000/v1/users
+
+BODY='{"email":"elisha@gmail.com", "password":"appletree"}'
+
+Elisha
+{
+        "authentication_token": {
+                "token": "AACW6X24FITR74EQP3PCGZWKDE",
+                "expiry": "2022-12-01T20:36:47.830494763-06:00"
+        }
+}
