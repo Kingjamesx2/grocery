@@ -162,17 +162,18 @@ func (app *application) requireActivatedUser(next http.HandlerFunc) http.Handler
 	return app.requireAuthenticatedUser(fn)
 }
 
+// Check for user permission
 func (app *application) requirePermission(code string, next http.HandlerFunc) http.HandlerFunc {
 	fn := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// get the user
+		// Get the user
 		user := app.contextGetUser(r)
-		// get the permission slice for the user
+		// Get the permission slice for the user
 		permissions, err := app.models.Permissions.GetAllForUser(user.ID)
 		if err != nil {
 			app.serverErrorResponse(w, r, err)
 			return
 		}
-		// check for the permisison
+		// Check for the permission
 		if !permissions.Include(code) {
 			app.notPermittedResponse(w, r)
 			return
@@ -180,12 +181,10 @@ func (app *application) requirePermission(code string, next http.HandlerFunc) ht
 		// OK
 		next.ServeHTTP(w, r)
 	})
-
 	return app.requireActivatedUser(fn)
 }
 
-//Enable CORS
-
+// Enable CORS
 func (app *application) enableCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// set the Access-Control-Allow-Origin header
