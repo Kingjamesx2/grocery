@@ -12,60 +12,62 @@ import (
 )
 
 func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Request) {
-	//Hold data from reuest body
+	// Hold data from the request body
 	var input struct {
 		Name     string `json:"name"`
 		Email    string `json:"email"`
 		Password string `json:"password"`
 	}
 
-	//Parese the request body into the anonymous struct
+	// Parse the request body into the anonymous struct
 	err := app.readJSON(w, r, &input)
 	if err != nil {
 		app.badRequestResponse(w, r, err)
 		return
 	}
-
-	//copy the data to a new struct
+	// Copy the data to a new struct
 	user := &data.User{
 		Name:      input.Name,
 		Email:     input.Email,
 		Activated: false,
 	}
-
-	//generate a password hash
+	// Generate a password hash
 	err = user.Password.Set(input.Password)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
 	}
-
 	// Perform validation
 	v := validator.New()
 	if data.ValidateUser(v, user); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
-
-	//Insert the datain the database
+	// Insert the data in the database
 	err = app.models.Users.Insert(user)
 	if err != nil {
 		switch {
 		case errors.Is(err, data.ErrDuplicateEmail):
-			v.AddError("email", "a user with this email address already exist")
+			v.AddError("email", "a user with this email address already exists")
 			app.failedValidationResponse(w, r, v.Errors)
 		default:
 			app.serverErrorResponse(w, r, err)
 		}
 		return
 	}
-
-	// Generate a token for the newly created user
+	// Add permissions for the newly inserted user
+	err = app.models.Permissions.AddForUser(user.ID, "groceryInfo:read")
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+	// Generate a token for the newly-created user
 	token, err := app.models.Tokens.New(user.ID, 1*24*time.Hour, data.ScopeActivation)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
 	}
+
 	app.background(func() {
 		data := map[string]interface{}{
 			"activationToken": token.Plaintext,
@@ -77,10 +79,8 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 			// log errors
 			app.logger.PrintError(err, nil)
 		}
-
 	})
-
-	//write a 202 Accepted status
+	// Write a 202 Accepted Status
 	err = app.writeJSON(w, http.StatusAccepted, envelope{"user": user}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
@@ -88,6 +88,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 }
 
 func (app *application) activateUserHandler(w http.ResponseWriter, r *http.Request) {
+	// Parse the plaintext activation token
 	var input struct {
 		TokenPlaintext string `json:"token"`
 	}
@@ -102,7 +103,8 @@ func (app *application) activateUserHandler(w http.ResponseWriter, r *http.Reque
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
-
+	// Get the user details of the provided token or give the
+	// client feedback about an invalid token
 	user, err := app.models.Users.GetForToken(data.ScopeActivation, input.TokenPlaintext)
 	if err != nil {
 		switch {
@@ -114,9 +116,9 @@ func (app *application) activateUserHandler(w http.ResponseWriter, r *http.Reque
 		}
 		return
 	}
-
+	// Update the user status
 	user.Activated = true
-
+	// Save the updated user's record in our database
 	err = app.models.Users.Update(user)
 	if err != nil {
 		switch {
@@ -127,17 +129,15 @@ func (app *application) activateUserHandler(w http.ResponseWriter, r *http.Reque
 		}
 		return
 	}
-
+	// Delete the user's token that was used for activation
 	err = app.models.Tokens.DeleteAllForUsers(data.ScopeActivation, user.ID)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
 	}
-	// Send a json response with the updated details
+	// Send a JSON response with the update details
 	err = app.writeJSON(w, http.StatusOK, envelope{"user": user}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
-		return
 	}
-
 }
