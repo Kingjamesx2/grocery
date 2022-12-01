@@ -1,0 +1,28 @@
+#Give all users read Permissions
+INSERT INTO users_permissions
+SELECT id, (SELECT id FROM permissions WHERE code = 'grocery:read') FROM users;
+
+
+
+#Give user panda write Permissions
+INSERT INTO users_permissions(user_id, permission_id)
+VALUES(
+(SELECT id FROM tblusers WHERE email = 'betty@example.com'),
+(SELECT id FROM permissions WHERE code = 'coltech_items:write')
+);
+
+
+#List the activated users and their Permissions
+SELECT email, array_agg(permissions.code) AS permissions
+FROM permissions
+INNER JOIN users_permissions
+ON users_permissions.permission_id = permissions.id
+INNER JOIN tblusers
+ON users_permissions.user_id = tblusers.id
+WHERE tblusers.activated = true
+GROUP BY email;
+
+
+# Test the endpoints to verify that Permissions works
+
+BODY='{"summary":"Email Not Sending", "description":"I am not able to send emails to CEO", "category":"Outlook", "department":"Admin", "created_by":"BETTY WHITE"}'
