@@ -185,6 +185,7 @@ func (app *application) requireActivatedUser(next http.HandlerFunc) http.Handler
 // }
 
 // Enable CORS
+
 func (app *application) enableCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// set the Access-Control-Allow-Origin header
