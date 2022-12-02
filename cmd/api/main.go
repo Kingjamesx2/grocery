@@ -76,7 +76,7 @@ func main() {
 	flag.StringVar(&cfg.smtp.password, "smtp-password", "62a447bb5ae637", "SMTP password")
 	flag.StringVar(&cfg.smtp.sender, "smtp-sender", "Grocery <no-reply@grocery.jamesfaber.net>", "SMTP sender")
 	//Use the flag.Func() function to parse our trusted origins flag from a string to a slice of string
-	flag.Func("cors-trusted-origin", "Trusted CORS origin (space separated)", func(val string) error {
+	flag.Func("cors-trusted-origins", "Trusted CORS origins (space separated)", func(val string) error {
 		cfg.cors.trustedOrigins = strings.Fields(val)
 
 		return nil
