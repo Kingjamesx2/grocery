@@ -36,7 +36,7 @@ pkill -SIGKILL api
 pkill -SIGTERM api
 pkill -SIGQUIT api
 ctrl + \ (SIGQUIT)
-
+J
 
 Rate limiting
 for i in {1..6}; do curl http://localhost:4000/v1/healthcheck; done
@@ -45,22 +45,63 @@ Graceful shutdown
 curl localhost:4000/v1/healthcheck & pkill -SIGTERM api
 
 Create new User
-BODY='{"name":"elishaMartine", "email":"elishaMartine@gmail.com", "password":"appletree"}'
+BODY='{"name":"Bunny", "email":"bunny@gmail.com", "password":"appletree"}'
+curl -H "Authorization: Bearer TCCJRKK2X7FZ44UOMFYEEFJ5TI" localhost:4000/v1/healthcheck
 curl -w '\nTime: %{time_total}\n' -d "$BODY" localhost:4000/v1/users
 
-BODY='{"email":"elisha@gmail.com", "password":"appletree"}'
+----------To get authentication code-------------------
+curl -i -d "$BODY" localhost:4000/v1/tokens/authentication
 
-Elisha
+BODY='{"email":"bunny@gmail.com", "password":"appletree"}'
+curl -H "Authorization: Bearer 2KS4MGKZDDCBCIT7GDYCO2YCF4" localhost:4000/v1/healthcheck
+Bunny
 {
         "authentication_token": {
-                "token": "AACW6X24FITR74EQP3PCGZWKDE",
+                "token": "2KS4MGKZDDCBCIT7GDYCO2YCF4",
                 "expiry": "2022-12-01T20:36:47.830494763-06:00"
         }
 }
 
-{
-        "authentication_token": {
-                "token": "2IVL54SCXW3HJSSE2NQQUTMEEM",
-                "expiry": "2022-12-01T21:21:49.272890481-06:00"
-        }
-}
+
+
+BODY='{"name":"Ben", "email":"ben@gmail.com", "password":"appletree"}'
+curl -w '\nTime: %{time_total}\n' -d "$BODY" localhost:4000/v1/users
+BODY='{"email":"ben@gmail.com", "password":"appletree"}'
+curl -i -d "$BODY" localhost:4000/v1/tokens/authentication
+curl -H "Authorization: Bearer GH5KJEJHIUW54F2YSZECAXDTIA" localhost:4000/v1/groceryInfo/4
+
+-------activate token--------
+curl -X PUT -d '{"token":"KVFMMSUT64344I6OXRFA2CLBV4"}' localhost:4000/v1/users/activated
+
+
+
+curl -X PUT -d '{"token":"VO6ZAYGDWDIKPNLICYTSQG3YUY"}' localhost:4000/v1/users/activated
+
+
+BODY='{"name":"Benny", "email":"benny@gmail.com", "password":"appletree"}'
+curl -w '\nTime: %{time_total}\n' -d "$BODY" localhost:4000/v1/users
+BODY='{"email":"benny@gmail.com", "password":"appletree"}'
+curl -i -d "$BODY" localhost:4000/v1/tokens/authentication
+curl -H "Authorization: Bearer POXEOZQG27JQHURAPGVXRFDVHU" localhost:4000/v1/groceryInfo/4
+
+activate token
+curl -X PUT -d '{"token":"L6IQXOUL2B64JLMNW74ODXUPWA"}' localhost:4000/v1/users/activated
+
+
+id bigserial PRIMARY KEY,
+    created_at timestamp(0) with time zone NOT NULL DEFAULT NOW(),
+    name text NOT NULL,
+    item text NOT NULL,
+    location text NOT NULL, 
+    price text NOT NULL, 
+    address text NOT NULL, 
+    phone text NOT NULL, 
+    contact text NOT NULL, 
+    email text NOT NULL, 
+    website text NOT NULL,
+BODY='{"name":"driane", "item":"pea", "location": "street", "price": "$1.12", "address": "23 street", "phone": "6234363", "contact":"6049299", "email": "driane@gmail.com", "website": "www.driane.com"}'
+
+
+go run ./cmd/api/ -cors-trusted-origins="http://localhost:9000 http://localhost:9090"
+go run ./cmd/demo/cors/basic/
+go run ./cmd/demo/cors/basic/ -addr=":9090"

@@ -15,4 +15,4 @@ CREATE TABLE IF NOT EXISTS users_permissions (
 
 INSERT INTO permissions (code)  
 VALUES 
-('schools:read'), ('schools:write');
+('grocery:read'), ('grocery:write');
